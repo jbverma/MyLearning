@@ -1,0 +1,98 @@
+ESTARGET="lnxapp227.emeter.com:9200"
+ORGHDFSNAME="org1145j"
+LOCALDIR="/home/eip/jiten"
+
+#usage
+usage(){
+echo "      -dbconnect" 
+echo "      -copy_req_de" 
+echo "      -copy_req_rr" 
+echo "      -get_index		<Index_pattern>" 
+echo "      -delete_indexes	<Index_pattern>"
+echo "      -delete_template	<Template_pattern>"
+}
+
+# dbconnect
+dbconnect() {
+java -classpath ${LOCALDIR}/lib/ojdbc7.jar:${LOCALDIR}/lib/jb-tools.jar com.sample.db.DBConnect ${LOCALDIR}/conf/appProperties/env.properties
+echo "Connection closed"
+}
+
+# Copy device event request
+copy_req_de () {
+  hdfs dfs -copyFromLocal ${LOCALDIR}/data/in /user/${ORGHDFSNAME}/staging/device_event_s_v1/
+  echo "Device Event request file moved into device_event_s_v1"
+}
+
+# Copy Interval request
+copy_req_int () {
+  hdfs dfs -copyFromLocal ${LOCALDIR}/data/in /user/${ORGHDFSNAME}/staging/device_event_s_v1/
+}
+
+# Copy rr request
+copy_req_rr () {
+  hdfs dfs -copyFromLocal ${LOCALDIR}/data/in /user/${ORGHDFSNAME}/staging/device_event_s_v1/
+}
+
+# Get Index <index_name>
+get_index() {
+curl -XGET ${ESTARGET}/${1}?pretty
+}
+
+# Delete indexes
+delete_indexes() {
+for idx in `curl ${ESTARGET}/_cat/indices | awk '{ print $3 }' | grep ${1}`
+do
+  echo "Deleting index [ $idx ] "
+  curl -XDELETE ${ESTARGET}/${idx}
+done
+}
+
+# Delete Template <name>
+delete_template() {
+curl -XDELETE ${ESTARGET}/_template/${1}
+}
+
+
+refreshall() {
+hdfs dfs -rm /user/devorg1/lib/em-analytics-common.jar
+hdfs dfs -rm /user/devorg1/lib/em-elasticrestclient-1.0.jar
+hdfs dfs -rm /user/devorg1/lib/httpclient-4.5.1.jar
+hdfs dfs -rm /user/devorg1/lib/httpasyncclient-4.1.2.jar
+hdfs dfs -rm /user/devorg1/lib/em-hadoop-utils.jar
+hdfs dfs -rm /user/devorg1/lib/em-hadoop-common-apps.jar
+
+hdfs dfs -copyFromLocal /home/eip/jiten/hadoopcommon/opt/hadoop-common/lib/em-analytics-common.jar /user/devorg1/lib
+hdfs dfs -copyFromLocal /home/eip/jiten/hadoopcommon/opt/hadoop-common/lib/em-elasticrestclient-1.0.jar /user/devorg1/lib
+hdfs dfs -copyFromLocal /home/eip/jiten/hadoopcommon/opt/hadoop-common/lib/httpclient-4.5.1.jar /user/devorg1/lib
+hdfs dfs -copyFromLocal /home/eip/jiten/hadoopcommon/opt/hadoop-common/lib/httpasyncclient-4.1.2.jar /user/devorg1/lib
+hdfs dfs -copyFromLocal /home/eip/jiten/hadoopcommon/opt/hadoop-common/lib/em-hadoop-utils.jar /user/devorg1/lib
+hdfs dfs -copyFromLocal /home/eip/jiten/hadoopcommon/opt/hadoop-common/lib/em-hadoop-common-apps.jar /user/devorg1/lib
+
+hdfs dfs -copyFromLocal /home/eip/jiten/HDFS/final_in/in /user/devorg1/staging/device_event_s_v1/
+
+echo "Refresh Completed" 
+}
+
+# refreshin
+copyin() {
+hdfs dfs -copyFromLocal /home/eip/Jiten/loader/in /user/orgone1053/staging/device_event_s_v1/
+echo "Files copied into /user/orgone1053/staging/device_event_s_v1/in" 
+}
+
+#delete index
+deleteindex() {
+curl -XDELETE 'lnxapp227.emeter.com:9200/device_events-orgone1053-*'
+echo "Index device_events-orgone1053-* deleted"
+}
+
+rerun(){
+deleteindex
+copyin
+}
+
+
+############################################
+# Run any of the above commands based on user input
+############################################
+$*
