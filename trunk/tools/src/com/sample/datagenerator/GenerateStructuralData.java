@@ -31,7 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import java.io.IOException;
 
-//@author Jitendra B Verma
+//@author Jitendra
 
 
 public class GenerateStructuralData {
