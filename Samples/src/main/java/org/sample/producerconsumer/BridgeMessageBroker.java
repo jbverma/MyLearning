@@ -24,13 +24,13 @@ public class BridgeMessageBroker {
     
     public void putResponse(Integer data) throws InterruptedException
     {
-        this.requestQueue.put(data);
+        this.responseQueue.put(data);
     }
  
     public Integer getResponse() throws InterruptedException
     {
     	//Wait up to 3 second if element is not available
-        return this.requestQueue.poll(3, TimeUnit.SECONDS);
+        return this.responseQueue.poll(3, TimeUnit.SECONDS);
     }
 
 }

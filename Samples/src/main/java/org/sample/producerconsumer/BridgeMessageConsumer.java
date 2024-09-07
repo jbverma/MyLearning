@@ -22,8 +22,13 @@ public class BridgeMessageConsumer implements Runnable{
             while (bridgeMessageBroker.continueProducing || data != null)
             {
                 Thread.sleep(1000);
-                System.out.println("Consumer " + this.name + " processed data from broker: " + data);
- 
+
+                // Process request
+                System.out.println("Consumer " + this.name + " processed data for request: " + data);
+                // Add response
+                bridgeMessageBroker.putResponse(data);
+
+                // Get next request
                 data = bridgeMessageBroker.getRequest();
             }
  

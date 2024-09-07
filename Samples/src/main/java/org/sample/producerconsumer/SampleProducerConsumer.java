@@ -18,6 +18,15 @@ public class SampleProducerConsumer {
 			//This will wait for the producer to finish its execution.
 			producerStatus.get();
 
+			// Get response from response queue
+			for (Integer i = 1; i < 50 + 1; ++i)
+			{
+				Thread.sleep(100);
+				Integer data = bridgeMessageBroker.getResponse();
+
+				System.out.println("Response received for request: " + data);
+			}
+
 			executorThreadPool.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();
